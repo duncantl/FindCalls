@@ -1,0 +1,10 @@
+Package: FindCalls
+Version: 0.1-0
+Title: Static analysis to find all calls
+Description: Statically analyze code to get all calls.
+  Extracted and simplified from the CodeAnalysis package.
+Author: Duncan Temple Lang, ...
+Maintainer: Duncan Temple Lang <dtemplelang@ucdavis.edu>
+License: GPL2
+Imports: codetools
+
