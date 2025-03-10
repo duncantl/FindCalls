@@ -1,6 +1,17 @@
+findCallsTo =
+function(code, funNames = character())    
+{
+    pred = if(length(funNames))
+               mkIsCallTo(funNames)
+           else
+               skipFunctions
+    findAllCalls(code, pred)
+}
+
 findAllCalls =
 function(code, pred = function(...) TRUE, skipIfFalse = TRUE,
-         walker = callFinder(pred, skipIfFalse = skipIfFalse))
+         walker = callFinder(pred, skipIfFalse = skipIfFalse)
+        )
 {
 
     if(is.character(code)) {
@@ -9,7 +20,6 @@ function(code, pred = function(...) TRUE, skipIfFalse = TRUE,
         else
             code = parse(text = code)
     }
-    
     
     walkCode(code, walker)
     walker$ans()
@@ -74,12 +84,13 @@ isCallTo =
 function (code, funName, indirect = character(),  #getIndirectCallFunList(), 
     isLHS = NA) 
 {
-    if (is(code, "ScriptNodeInfo")) 
-        x = code@code
-    if (is(code, "R6")) 
-        is(code, "Call") && is_symbol(code$fn) && code$fn$value %in% 
-            funName
-    else (is.call(code) || is(code, "call")) && (isSymbol(code[[1]], funName)
+#   if (inherits(code, "ScriptNodeInfo")) 
+#       x = code@code
+#   if (inherits(code, "R6")) 
+#       inherits(code, "Call") && is_symbol(code$fn) && code$fn$value %in% 
+#           funName
+#   else
+        (is.call(code) || inherits(code, "call")) && (isSymbol(code[[1]], funName)
       #  || (!isFALSE(indirect) && isIndirectCall(code, 
       #                                           indirect, funName, TRUE, isLHS = isLHS))
     )
