@@ -15,7 +15,9 @@ if(FALSE) {
 
     foo(x, 2) = 110
 
-    foo(x^2, 2) = 110    
+    foo(x^2, 2) = 110
+    foo(bar(x^2), 2) = 110
+    foo(bar(x)^2, 2) = 110
 }
 
 a = parse("assign.R")[[1]][[3]]
