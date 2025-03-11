@@ -1,11 +1,11 @@
 findCallsTo =
-function(code, funNames = character())    
+function(code, funNames = character(), ...)    
 {
     pred = if(length(funNames))
                mkIsCallTo(funNames)
            else
                skipFunctions
-    findAllCalls(code, pred)
+    findAllCalls(code, pred, ...)
 }
 
 findAllCalls =
