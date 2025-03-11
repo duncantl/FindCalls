@@ -28,17 +28,31 @@ table(unname(pkgs))
 # Seeing what files or directories we read from.
 #
 
-# What are the names of functions used in the code that contain read in the name?
-unique(grep("read", fns, ignore.case = TRUE, value = TRUE))
-
 # We know the names of some read functions. We'll look for those.
 ReadFuns = c("read.csv", "read.table", "read.fwf", "readxl", "read_excel", "read.xls", "readLines")
-# We'll get the name of the first argument, which is typically the source from which to read.
-avail = sapply(ReadFuns, function(x) length(find(x)) > 0)
-sapply(ReadFuns[avail], function(x) names(formals(x))[1])
 
-ReadFunArgName = rep(NA, length(ReadFuns)
+# What are the names of functions used in the code that contain read in the name?
+unique(grep("read", fns, ignore.case = TRUE, value = TRUE))
+# In my example, we have readRiceFiles{,2} and these are probably functions defined in the scripts that will read files.
+# So we want to include those in the
 
+# getFunctionDefs is currently in CodeAnalysis.
+# A simple version is findCallsTo(code, "function"). However, this gets all nested functions too.
+fns2 = unlist(lapply(vt, getFunctionDefs))
+grep("readRiceFiles", names(fns2), value = TRUE)
+# So each appears to be defined in 3 places
+
+# But that's not the point. We can look in each function and see if they call any function in ReadFuns.
+calls = lapply(fns2, function(fun) {
+                        k = findCallsTo(fun)
+                        cfuns = sapply(k, function(x) if(is.name(x[[1]])) as.character(x[[1]]) else "")
+                     })
+tmp = lapply(calls, intersect, ReadFuns)
+callsReadFuns = names(tmp)[ sapply(tmp, length) > 0]
+
+# We see read_vt, getPOWER, get_ucipm, readRiceFiles, readRiceFiles2
+# So we can add those to the ReadFuns.
+ReadFuns = c(ReadFuns, callsReadFuns)
 
 readCalls = lapply(vtp, findCallsTo, ReadFuns)
 nc = sapply(readCalls, length)
