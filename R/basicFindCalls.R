@@ -19,7 +19,8 @@ function(code, pred = function(...) TRUE, skipIfFalse = TRUE,
             code = parse(code)
         else
             code = parse(text = code)
-    }
+    } else if(is.function(code))
+        code = list(formals(code), body(code))
     
     walkCode(code, walker)
     walker$ans()
