@@ -2,4 +2,10 @@ import(codetools)
 
 export(findAllCalls)
 
+export(findAssignsTo)
+
+export(isFunctionDef, callTo)
+
+export(getFunctionDefs2)
+
 
