@@ -62,8 +62,30 @@ rc2 = unlist(readCalls)
 fileLiterals = unlist(lapply(rc2, function(x) if(length(x) > 1 && is.character(x[[2]])) x[[2]] else NA))
 unname(fileLiterals)
 
+fn3 = sapply(rc2, function(x) deparse(x[[1]]))
+w2 = sapply(rc2, function(x) is.character(x[[2]]))
 
-# Better to use match.call
+# Now are there any calls to these locally defined read functions that have a literal string as the first argument?
+table(fn3[w2] %in% callsReadFuns)
+# No.
+
+
+
+###################
+# Better to use match.call() for analyzing the call.
+# Could have read.table(sep = "\t", file)
+# But can't call match.call() unless we have the function definition.
+# This is where having the names of the packages that are loaded in the scripts is useful.
+# We could use install.packages() and the load them.
+# For the functions defined locally within the scripts, we have then in fns
+
+
+# We'll get the name of the first argument, which is typically the source from which to read.
+avail = sapply(ReadFuns, function(x) length(find(x)) > 0)
+sapply(ReadFuns[avail], function(x) names(formals(x))[1])
+
+ReadFunArgName = rep(NA, length(ReadFuns)
+
 #
 ex = sapply(rc2, function(x) is.symbol(x[[1]]) && exists(as.character(x[[1]]), mode = "function"))
 table(ex)
