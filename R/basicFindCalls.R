@@ -11,13 +11,29 @@ function(code, funNames = character(), ...)
 findAllCalls =
 function(code, pred = function(...) TRUE, skipIfFalse = TRUE,
          walker = callFinder(pred, skipIfFalse = skipIfFalse)
-        )
+         )
+    # should we add a recurive = and a pattern =
+    # for use in list.files.
+    # Or just let the caller get the list of files themselves.
 {
 
     if(is.character(code)) {
-        if(file.exists(code))
+
+        if(length(code) > 1)
+            # should pass walker but that will accumulate answers. Need to reset after each one.
+            # Putting the names here is bad when the content is code, not file names!
+            return(structure(lapply(code, findAllCalls, pred, skipIfFalse), names = code))
+        
+        
+        if(file.exists(code)) {
+
+            if(file.info(code)$isdir)
+                return(findAllCalls(list.files(code, pattern = "\\.[RrSq]$", full.names = TRUE),
+                                    pred, skipIfFalse)) # walker again!
+
+            
             code = parse(code)
-        else
+        } else
             code = parse(text = code)
     } else if(is.function(code))
         code = list(formals(code), body(code))
