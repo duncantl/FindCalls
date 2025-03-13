@@ -13,7 +13,7 @@ table(direct)
 # That is a call
 #    colorRampPalette(cols)(255)
 
-fns = sapply(ac[direct], function(x) deparse(x[[1]]))
+fns = sapply(ac[direct], callTo)
 table(fns)
 
 # Let's find calls to library or require
@@ -62,7 +62,7 @@ rc2 = unlist(readCalls)
 fileLiterals = unlist(lapply(rc2, function(x) if(length(x) > 1 && is.character(x[[2]])) x[[2]] else NA))
 unname(fileLiterals)
 
-fn3 = sapply(rc2, function(x) deparse(x[[1]]))
+fn3 = sapply(rc2, callTo)
 w2 = sapply(rc2, function(x) is.character(x[[2]]))
 
 # Now are there any calls to these locally defined read functions that have a literal string as the first argument?
@@ -81,19 +81,37 @@ table(fn3[w2] %in% callsReadFuns)
 
 
 # We'll get the name of the first argument, which is typically the source from which to read.
+
+ReadFunArgName = rep(NA, length(ReadFuns))
+names(ReadFunArgName) = ReadFuns
 avail = sapply(ReadFuns, function(x) length(find(x)) > 0)
-sapply(ReadFuns[avail], function(x) names(formals(x))[1])
+ReadFunArgName[avail] = sapply(ReadFuns[avail], function(x) names(formals(x))[1])
 
-ReadFunArgName = rep(NA, length(ReadFuns)
 
-#
+# Here we do something slightly different but similar to avail above but this time
+# we are looking at all the calls (rc2) and seeing if this is calling a function  by name ( or itself a call)
+# and for this that refer to a name, we check if we can find the function on the search path.
+# Then for the ones we do have a function defintion, we use match.call to convert the call into the
+# canonical form, i.e., rearrange arguments, add names, etc.
+
+# fnName = sapply(rc2, \(x) as.character(x[[1]]))
 ex = sapply(rc2, function(x) is.symbol(x[[1]]) && exists(as.character(x[[1]]), mode = "function"))
 table(ex)
-fnName = sapply(rc2, \(x) as.character(x[[1]]))
 # For me, read_excel and read.xls are not on the search path.
 rc3 = rc2
 rc3[ex] = lapply(rc3[ex], function(x) match.call(get(as.character(x[[1]]), mode = "function"), x))
 
+# So now we can process these more accurately.
+# The ones where ex == FALSE, we still are taking a guess that the first argument is the file.
+
+
+# We can arrange to have all the functions available since we can
+# find the calls to library & require and then install those packages
+# and load them.  To be accurate we have to handle potential masking or multiple functions with the same name
+# or get the order we load them to be the same as the code would, i.e.,
+# in script A know where to find function fun1 based on which calls to library/require were made in that script.
+# But in script B, know that the library/require calls would be different and change the search path so look for
+# fun1 in that script based on its package loaded.
 
 
 
